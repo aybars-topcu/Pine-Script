@@ -28,8 +28,7 @@ var lossPos = 0
 
 // ------------------- POSITION SIZING -----------------
 
-
-
+// double down on strategy if previous position closes with a loss
 if(strategy.losstrades>strategy.losstrades[1] and strategy.wintrades==strategy.wintrades[1])
     lossPos := lossPos+1
     if(lossPos>=1)
@@ -37,7 +36,7 @@ if(strategy.losstrades>strategy.losstrades[1] and strategy.wintrades==strategy.w
     else
         pSize := pSize*1
 
-// we reset our position size to 1 unit if our last trade is a winner       
+// reset position size to 1 unit if our last trade is a winner       
 else if(strategy.wintrades>strategy.wintrades[1] and strategy.losstrades==strategy.losstrades[1])
     pSize := pSize1
     lossPos := 0
