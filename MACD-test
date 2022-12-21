@@ -1,0 +1,54 @@
+//@version= 4
+
+// verify trade with weekly chart (no overbought position)
+// always only long strategy
+
+// MYM1! is the ticker for micro DOW futures contracts on which we will test our MACD idea
+strategy(title="MYM1!", pyramiding=1, overlay = true)  
+
+// arrange backtesting window
+start     = timestamp("GMT+3", 2020, 1, 2, 10, 00)
+window() => time>start 
+//finish    = timestamp("GMT+3", 2021, 12, 30, 23, 59)
+//window()  => time >= start and time <= finish ? true : false
+
+// MACD setup
+fastMA = ema(close, 8)
+slowMA = ema(close, 16)
+macd = fastMA - slowMA
+signal = sma(macd, 11)
+
+// start variables
+var goLong = false
+var goShort = false
+var pSize1 = 1.00  
+var pSize = pSize1
+var lossPos = 0
+
+
+// ------------------- POSITION SIZING -----------------
+
+
+
+if(strategy.losstrades>strategy.losstrades[1] and strategy.wintrades==strategy.wintrades[1])
+    lossPos := lossPos+1
+    if(lossPos>=1)
+        pSize :=pSize*2
+    else
+        pSize := pSize*1
+
+// we reset our position size to 1 unit if our last trade is a winner       
+else if(strategy.wintrades>strategy.wintrades[1] and strategy.losstrades==strategy.losstrades[1])
+    pSize := pSize1
+    lossPos := 0
+
+
+// --------------------- LONG --------------------------
+
+// if conditions are met go long
+goLong := strategy.position_size==0 and crossover(macd,signal) and macd<0  and window() and close[15]<close+800  //and window() and time>tradeStart and time<tradeEnd and window()
+
+// profit loss margin setup
+if(goLong)
+    strategy.entry("Long", true, pSize)
+    strategy.exit("ExL","Long", profit=1000,loss=1000)  
